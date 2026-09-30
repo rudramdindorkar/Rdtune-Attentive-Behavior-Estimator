@@ -17,7 +17,7 @@
 | **Privacy** | 100% on-device. No cloud, no network calls, no video or images saved |
 | **Face model** | MediaPipe **Face Landmarker** (`face_landmarker.task`, open source, Apache 2.0) |
 | **Try it** | Run [`Application/attentive_behavior_estimator.exe`](Application/),  |
-| **Demo** | [`demo/`](Demo:screenshots/): demo video · how-to-run video · performance screenshots |
+| **Demo** | [`Demo:screenshots/`](Demo:screenshots/): demo video · how-to-run video · performance screenshots |
 
 ---
 
@@ -229,10 +229,10 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 
 | Metric | Result | Evidence |
 |---|---|---|
-| Throughput | **92 FPS** (≈ 11 ms per frame, end to end) | [`demo/screenshots/92fps_snapdragon.png`](Demo:screenshots/) |
-| Memory | **212.8 MB** | [`demo/screenshots/task_manager_213mb.png`](Demo:screenshots/) |
+| Throughput | **92 FPS** (≈ 11 ms per frame, end to end) | [`Demo:screenshots/fps.png`](Demo:screenshots/) |
+| Memory | **212.8 MB** | [`Demo:screenshots/task_manager.png`](Demo:screenshots/) |
 | CPU | **~2.0%** | Task Manager screenshot |
-| Delivery | Single `.exe` | [`application/`](Application/) |
+| Delivery | Single `.exe` | [`Application/`](Application/) |
 
 ![Task Manager showing ~213 MB and ~2% CPU](Demo:screenshots/task_manager.png)
 
@@ -295,11 +295,11 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 ## 7. Deployment & accessibility
 
 ### Option A: Run the `.exe` (recommended, no setup)
-1. Download `attentive_behavior_estimator.exe` from [`application/`](Application/).
+1. Download `attentive_behavior_estimator.exe` from [`Application/`](Application/).
 2. For the first ~12 s, look at your screen and glance at each corner once (calibration).
 3. The HUD appears and adaptive sound starts automatically (green while you're focused).
 
-📹 Step-by-step video: [`demo/how_to_run_exe.mp4`](Demo:screenshots/)
+📹 Step-by-step video: [`Demo:screenshots/how_to_run_exe.mp4`](Demo:screenshots/)
 
 ### Option B: Run from source
 ```bash
