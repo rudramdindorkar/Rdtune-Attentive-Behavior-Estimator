@@ -1,0 +1,5 @@
+numpy>=1.23,<3
+PyYAML>=6.0
+opencv-python>=4.8
+mediapipe>=0.10
+pygame>=2.5
