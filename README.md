@@ -8,7 +8,7 @@
 
 > Submission for the **Snapdragon® AI Lab Build & Present Challenge**
 
-![Rdtune running on Snapdragon X2 Elite at 92 FPS](demo/screenshots/fps.png)
+![Rdtune running on Snapdragon X2 Elite at 92 FPS](Demo:screenshots/fps.png)
 
 | | |
 |---|---|
@@ -17,7 +17,7 @@
 | **Privacy** | 100% on-device. No cloud, no network calls, no video or images saved |
 | **Face model** | MediaPipe **Face Landmarker** (`face_landmarker.task`, open source, Apache 2.0) |
 | **Try it** | Run [`application/attentive_behavior_estimator.exe`](application/),  |
-| **Demo** | [`demo/`](demo/): demo video · how-to-run video · performance screenshots |
+| **Demo** | [`demo/`](Demo:screenshots/): demo video · how-to-run video · performance screenshots |
 
 ---
 
@@ -30,10 +30,8 @@
 6. [Scientific evidence](#6-scientific-evidence)
 7. [Deployment & accessibility](#7-deployment--accessibility)
 8. [Repository structure](#8-repository-structure)
-9. [Code walkthrough](#9-code-walkthrough)
-10. [Limitations & future work](#10-limitations--future-work)
-11. [Judging criteria map](#11-judging-criteria-map)
-12. [Credits & licenses](#12-credits--licenses)
+9. [Limitations & future work](#9-limitations--future-work)
+10. [Credits & licenses](#10-credits--licenses)
 
 ---
 
@@ -137,7 +135,7 @@ This shows the design working as intended: with no face, it flags the situation,
 
 **Rdtune with a face visible (focused state):**
 
-![Rdtune in the focused state with green noise playing](demo/screenshots/focused.png)
+![Rdtune in the focused state with green noise playing](Demo:screenshots/focused.png)
 
 ### Reading the HUD
 | HUD element | Meaning |
@@ -231,12 +229,12 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 
 | Metric | Result | Evidence |
 |---|---|---|
-| Throughput | **92 FPS** (≈ 11 ms per frame, end to end) | [`demo/screenshots/92fps_snapdragon.png`](demo/screenshots/) |
-| Memory | **212.8 MB** | [`demo/screenshots/task_manager_213mb.png`](demo/screenshots/) |
+| Throughput | **92 FPS** (≈ 11 ms per frame, end to end) | [`demo/screenshots/92fps_snapdragon.png`](Demo:screenshots/) |
+| Memory | **212.8 MB** | [`demo/screenshots/task_manager_213mb.png`](Demo:screenshots/) |
 | CPU | **~2.0%** | Task Manager screenshot |
-| Delivery | Single `.exe` | [`application/`](application/) |
+| Delivery | Single `.exe` | [`application/`](Application/) |
 
-![Task Manager showing ~213 MB and ~2% CPU](demo/screenshots/task_manager.png)
+![Task Manager showing ~213 MB and ~2% CPU](Demo:screenshots/task_manager.png)
 
 ### How it's optimized
 1. **Compact, purpose-built model.** `face_landmarker.task` (MediaPipe) is designed for real-time on-device use, with **no GPU or NPU required**.
@@ -297,11 +295,11 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 ## 7. Deployment & accessibility
 
 ### Option A: Run the `.exe` (recommended, no setup)
-1. Download `attentive_behavior_estimator.exe` from [`application/`](application/).
+1. Download `attentive_behavior_estimator.exe` from [`application/`](Application/).
 2. For the first ~12 s, look at your screen and glance at each corner once (calibration).
 3. The HUD appears and adaptive sound starts automatically (green while you're focused).
 
-📹 Step-by-step video: [`demo/how_to_run_exe.mp4`](demo/)
+📹 Step-by-step video: [`demo/how_to_run_exe.mp4`](Demo:screenshots/)
 
 ### Option B: Run from source
 ```bash
@@ -362,17 +360,16 @@ Rdtune/
 │   ├── attentive_behavior_estimator.py
 │   ├── face_landmarker.task          # MediaPipe model (default lookup: same folder as the .py)
 │   ├── requirements.txt
-│   ├── HOW_TO_RUN.txt
-│   └── Noise/                       
+│   ── Noise/                       
 ├── application/
-│   └── attentive_behavior_estimator.exe   (or .zip)
+│   └── attentive_behavior_estimator.exe   
 ├── demo/
-│   ├── demo_video.mp4
+│   ├── demo.mp4
 │   ├── how_to_run_exe.mp4
 │   └── screenshots/
 │       ├── 92fps_snapdragon.png
 │       ├── focused_state.png
-│       └── task_manager_213mb.png
+│       └── task_manager.png
 ├── README.md
 └── LICENSE
 ```
