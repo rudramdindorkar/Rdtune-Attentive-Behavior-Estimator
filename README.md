@@ -16,7 +16,7 @@
 | **Footprint** | **~213 MB RAM · ~2% CPU** (Windows Task Manager) |
 | **Privacy** | 100% on-device. No cloud, no network calls, no video or images saved |
 | **Face model** | MediaPipe **Face Landmarker** (`face_landmarker.task`, open source, Apache 2.0) |
-| **Try it** | Run [`application/attentive_behavior_estimator.exe`](application/),  |
+| **Try it** | Run [`Application/attentive_behavior_estimator.exe`](Application/),  |
 | **Demo** | [`demo/`](Demo:screenshots/): demo video · how-to-run video · performance screenshots |
 
 ---
