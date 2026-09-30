@@ -1,14 +1,13 @@
 # Rdtune---Attentive-Behavior-Estimator
 
-
-#  Rdtune
+# Rdtune
 ### Attentive-Behavior Estimator
 
 **Real-time, on-device focus detection that responds with adaptive background sound, built for and tested on the Snapdragon® X2 Elite.**
 
 > Submission for the **Snapdragon® AI Lab Build & Present Challenge**
 
-![Rdtune running on Snapdragon X2 Elite at 92 FPS](Demo:screenshots/fps.png)
+![Rdtune running on Snapdragon X2 Elite at 92 FPS](Demo/fps.png)
 
 | | |
 |---|---|
@@ -16,12 +15,13 @@
 | **Footprint** | **~213 MB RAM · ~2% CPU** (Windows Task Manager) |
 | **Privacy** | 100% on-device. No cloud, no network calls, no video or images saved |
 | **Face model** | MediaPipe **Face Landmarker** (`face_landmarker.task`, open source, Apache 2.0) |
-| **Try it** | Run [`Application/attentive_behavior_estimator.exe`](Application/),  |
-| **Demo** | [`Demo:screenshots/`](Demo:screenshots/): demo video · how-to-run video · performance screenshots |
+| **Try it** | Run [`Application/attentive_behavior_estimator.exe`](Application/) |
+| **Demo** | [`Demo/`](Demo/): demo video · how-to-run video · performance screenshots |
 
 ---
 
 ## 📌 Contents
+
 1. [What it is](#1-what-it-is)
 2. [How it works](#2-how-it-works)
 3. [The sound engine: how the noises help](#3-the-sound-engine-how-the-noises-help)
@@ -46,7 +46,8 @@
 
 **Built for:** students, remote workers, developers, and anyone who wants a gentle, non-intrusive focus aid rather than an app blocker or a strict timer.
 
-**What makes it different**
+### What makes it different
+
 - **Personal, not generic.** It calibrates to *you* (your screen region, your head pose, your eye openness), so it works across faces, cameras and seating positions without labeled training data.
 - **Honest about uncertainty.** Bad lighting, a small face, or an absent face lowers confidence instead of producing a confident guess.
 - **Transparent.** A weighted, explainable rule set produces the score, and the HUD shows *why* (e.g. "gaze outside the calibrated screen region for 7.0 of 10 s").
@@ -73,9 +74,11 @@ flowchart LR
 ```
 
 ### Step 1: Face landmarks (MediaPipe)
+
 `FaceLandmarker` runs in **VIDEO mode** (tracking across frames) for one face and returns 478 landmarks (including both irises), 52 blendshape scores, and a facial transformation matrix (head pose).
 
 ### Step 2: Per-frame features (`FeatureExtractor`)
+
 | Feature | How it is computed |
 |---|---|
 | **Gaze** (horizontal + vertical) | Iris centre relative to each eye's corners (and lid opening for vertical), averaged across both eyes |
@@ -84,7 +87,9 @@ flowchart LR
 | **Quality metrics** | Face size, brightness in the face region, landmark jitter |
 
 ### Step 3: Personal baseline (12-second calibration)
+
 On launch you look at the screen and glance at each corner once. From that, the app learns *your*:
+
 - on-screen **gaze region** (2nd–98th percentile of your gaze, plus a 1.25× margin),
 - **neutral head pose** and its natural variation (robust SD via MAD),
 - **open-eye EAR**.
@@ -92,6 +97,7 @@ On launch you look at the screen and glance at each corner once. From that, the 
 Everything after this is measured *relative to you*. If calibration can't collect enough valid frames it falls back to a **provisional** baseline, and confidence is halved to reflect that. Press `c` to recalibrate anytime.
 
 ### Step 4: Window features (10 s window, updated every 1 s)
+
 Time-weighted fractions of the window that show:
 
 | Signal | Definition |
@@ -102,12 +108,14 @@ Time-weighted fractions of the window that show:
 | `long_closure_frac` | Eyes closed for ≥ 0.5 s at a time (drowsiness proxy; normal blinks are ignored) |
 
 ### Step 5: Off-task probability (transparent heuristic)
-```
+
+```text
 z = bias + Σ weight_i × clip((signal_i − deadzone_i) / (1 − deadzone_i), 0, 1)
 P(off-task) = sigmoid(z)
 ```
+
 | Rule | Weight | Dead-zone |
-|---|---|---|
+|---|---:|---:|
 | Face absent | 6.0 | 0.10 |
 | Gaze off-screen | 4.0 | 0.10 |
 | Head turned away | 3.0 | 0.10 |
@@ -116,15 +124,19 @@ P(off-task) = sigmoid(z)
 Bias = −3.0, so P ≈ 5% when nothing fires. Weights are **hand-set design choices, not fitted to data**, and are stated as such in the code.
 
 ### Step 6: Temporal smoothing
+
 A two-state forward filter (`stay_prob = 0.9`, `evidence_weight = 0.3`) stops single noisy windows from flipping the state. It resets when the face is absent so an absence doesn't leave "off-task" belief behind after you return.
 
 ### Step 7: Confidence & data quality
-```
+
+```text
 confidence = quality × baseline_factor × (0.4 + 0.6 × |2p − 1|)     (× 0.7 if face absent)
 ```
+
 Quality is reduced for: `face_small`, `too_dark`, `overexposed`, `jittery_landmarks`, `extreme_pose`, `low_fps`. `baseline_factor` is 1.0 for a personal baseline and 0.5 for a provisional one. Estimates below **0.30 confidence never change the sound zone**.
 
 ### 🧪 Worked example: the HUD in the screenshot above
+
 The Device Cloud camera feed contains no face, so the window is 100% `face_absent`:
 
 - `z = −3.0 + 6.0 = 3.0` → **P(off-task) = sigmoid(3.0) ≈ 95%** ✅ matches the HUD
@@ -135,9 +147,10 @@ This shows the design working as intended: with no face, it flags the situation,
 
 **Rdtune with a face visible (focused state):**
 
-![Rdtune in the focused state with green noise playing](Demo:screenshots/focused.png)
+![Rdtune in the focused state with green noise playing](Demo/focused.png)
 
 ### Reading the HUD
+
 | HUD element | Meaning |
 |---|---|
 | **FPS** | Live loop rate |
@@ -154,9 +167,11 @@ This shows the design working as intended: with no face, it flags the situation,
 ## 3. The sound engine: how the noises help
 
 ### The idea
+
 Distractions and mind-wandering pull attention away. A steady, non-semantic sound can **mask sudden environmental noise** and, for some people, **raise arousal toward a level that suits concentration**. Rather than playing sound constantly, the app **matches sound to your detected state** and stays quiet when it shouldn't act.
 
 ### Noise types (synthesized on-device)
+
 All tracks are generated in the frequency domain with random phases, which makes them **seamless loops**. They are 30 s, 44.1 kHz stereo (independent L/R), with equal loudness (RMS ≈ −18 dBFS) and no energy below 20 Hz. You can optionally drop your own tracks into `Noise/*.mp3`.
 
 | Noise | Spectrum | Character |
@@ -169,7 +184,7 @@ All tracks are generated in the frequency domain with random phases, which makes
 ### Zone → sound mapping (the adaptive loop)
 
 | Zone | Trigger (smoothed P off-task) | Sound | Volume* |
-|---|---|---|---|
+|---|---|---|---:|
 | ✅ **Focused** | < 0.35 | **Green** | 0.15 |
 | 🟡 **Drifting** | 0.35 – 0.65 | **Pink** | 0.25 |
 | 🔴 **Off-task** | ≥ 0.65 | **White** | 0.30 |
@@ -180,6 +195,7 @@ All tracks are generated in the frequency domain with random phases, which makes
 **How this resolves lost focus:** as you drift, the sound steps up gradually from gentle green to broader-spectrum pink to white, increasing masking of distractions when you need it most. As you recover, it steps back down, so the sound never becomes a permanent crutch. When you're away, there's nothing to help, so it goes silent.
 
 ### Anti-annoyance rules (what makes it usable)
+
 | Rule | Setting |
 |---|---|
 | **Debounce**: a change must be wanted for this long before it happens | 4 s |
@@ -212,6 +228,7 @@ All tracks are generated in the frequency domain with random phases, which makes
 - 🔒 **Private by design**: no recording, no upload
 
 ### Keyboard controls
+
 | Key | Action |
 |---|---|
 | `c` | Recalibrate |
@@ -229,14 +246,15 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 
 | Metric | Result | Evidence |
 |---|---|---|
-| Throughput | **92 FPS** (≈ 11 ms per frame, end to end) | [`Demo:screenshots/fps.png`](Demo:screenshots/) |
-| Memory | **212.8 MB** | [`Demo:screenshots/task_manager.png`](Demo:screenshots/) |
+| Throughput | **92 FPS** (≈ 11 ms per frame, end to end) | [`Demo/fps.png`](Demo/fps.png) |
+| Memory | **212.8 MB** | [`Demo/task_manager.png`](Demo/task_manager.png) |
 | CPU | **~2.0%** | Task Manager screenshot |
 | Delivery | Single `.exe` | [`Application/`](Application/) |
 
-![Task Manager showing ~213 MB and ~2% CPU](Demo:screenshots/task_manager.png)
+![Task Manager showing ~213 MB and ~2% CPU](Demo/task_manager.png)
 
 ### How it's optimized
+
 1. **Compact, purpose-built model.** `face_landmarker.task` (MediaPipe) is designed for real-time on-device use, with **no GPU or NPU required**.
 2. **Tracking, not re-detecting.** `RunningMode.VIDEO` with `num_faces=1` tracks the face across frames, which is far cheaper than detecting from scratch every frame.
 3. **Fixed 640×480 processing resolution.** Every frame is resized before inference, bounding per-frame cost regardless of camera resolution.
@@ -256,6 +274,7 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 ## 6. Scientific evidence
 
 ### 6.1 Attention can be inferred from facial and head features
+
 | Finding | Reference |
 |---|---|
 | Student attention level can be predicted from facial and head/body features | Zaletelj & Košir (2017), *EURASIP Journal on Image and Video Processing* |
@@ -269,6 +288,7 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 *Implemented here as: gaze from iris landmarks, head pose from the transformation matrix, and eye closure via EAR + blendshapes with a ≥ 0.5 s "long closure" rule inspired by PERCLOS.*
 
 ### 6.2 Background noise can improve focus
+
 | Finding | Reference |
 |---|---|
 | Moderate-arousal model: noise can benefit attention, especially in people with lower baseline arousal or attention difficulty | Sikström & Söderlund (2007), *Psychological Review* |
@@ -279,6 +299,7 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 | Binaural beats: small but significant benefits for attention and memory | Garcia-Argibay, Santed & Reales (2019), *Psychological Research* |
 
 ### How strong is the evidence for *this* design?
+
 | Design choice | Evidence |
 |---|---|
 | Steady noise can aid focus for some people; white / moderate-level noise is best studied | ✅ Reasonable |
@@ -287,7 +308,7 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 | The specific *zone → noise* mapping | 🧪 Design hypothesis; the code and this README say so explicitly |
 
 > Effects vary by person and level. That is exactly why the app **adapts, keeps sound optional, caps volume, and defaults to quiet when you're focused or away** rather than playing noise nonstop.
->
+
 > *Please verify each citation's details before final submission.*
 
 ---
@@ -295,15 +316,18 @@ Measured on **Qualcomm® Device Cloud**: Snapdragon® X2 Elite (SC8480X), Window
 ## 7. Deployment & accessibility
 
 ### Option A: Run the `.exe` (recommended, no setup)
+
 1. Download `attentive_behavior_estimator.exe` from [`Application/`](Application/).
 2. For the first ~12 s, look at your screen and glance at each corner once (calibration).
 3. The HUD appears and adaptive sound starts automatically (green while you're focused).
 
-📹 Step-by-step video: [`Demo:screenshots/how_to_run_exe.mp4`](Demo:screenshots/)
+📹 Step-by-step video: [`Demo/how_to_run_exe.mp4`](Demo/how_to_run_exe.mp4)
 
 ### Option B: Run from source
+
 ```bash
 Go to your PWD then :-
+
 # 1. Install Python 3.12
 winget install --id Python.Python.3.12 --source winget
 
@@ -321,28 +345,39 @@ py -3.12 -m pip install --upgrade pip
 
 # 6. Install dependencies from requirements.txt
 py -3.12 -m pip install -r requirements.txt
-#optinal
+
+# optional
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
-Optional flags:
-```bash
-python attentive_behavior_estimator.py --camera 1            # pick another webcam
-python attentive_behavior_estimator.py --headless            # no window, audio + camera only
-python attentive_behavior_estimator.py --config my.yaml      # override any setting
-python attentive_behavior_estimator.py --landmarker PATH     # custom model location
-```
 
+Optional flags:
+
+```bash
+python attentive_behavior_estimator.py --camera 1
+# pick another webcam
+
+python attentive_behavior_estimator.py --headless
+# no window, audio + camera only
+
+python attentive_behavior_estimator.py --config my.yaml
+# override any setting
+
+python attentive_behavior_estimator.py --landmarker PATH
+# custom model location
+```
 
 **Dependencies:** `numpy`, `pyyaml`, `opencv-python`, `mediapipe`, `pygame`
 
 ### Requirements
-- EXE file :-Windows 10/11 (tested on **Windows 11, Snapdragon X2 Elite**)
-- Souce code and Run on any OS (mac,linux) tested on **Mac m3 air
+
+- EXE file: **Windows 10/11** (tested on **Windows 11, Snapdragon X2 Elite**)
+- Source code: run on any OS (macOS, Linux) — tested on **Mac M3 Air**
 - Webcam and speakers or headphones
 - Roughly 250 MB of free RAM
 
 ### Accessibility & usability
+
 - **Zero-install** `.exe`, and no account or internet needed
 - **Private**: safe for schools and workplaces, since nothing leaves the device
 - **Non-intrusive**: sound, not pop-ups or blocking
@@ -354,39 +389,42 @@ python attentive_behavior_estimator.py --landmarker PATH     # custom model loca
 
 ## 8. Repository structure
 
-```
+```text
 Rdtune/
 ├── source_code/
 │   ├── attentive_behavior_estimator.py
-│   ├── face_landmarker.task          # MediaPipe model (default lookup: same folder as the .py)
+│   ├── face_landmarker.task
 │   ├── requirements.txt
-│   ── Noise/                       
-├── application/
-│   └── attentive_behavior_estimator.exe   
-├── demo/
-│   ├── demo.mp4
+│   └── Noise/
+│
+├── Application/
+│   └── attentive_behavior_estimator.exe
+│
+├── Demo/
+│   ├── demo.mov
 │   ├── how_to_run_exe.mp4
-│   └── screenshots/
-│       ├── 92fps_snapdragon.png
-│       ├── focused_state.png
-│       └── task_manager.png
+│   ├── fps.png
+│   ├── focused.png
+│   └── task_manager.png
+│
 ├── README.md
 └── LICENSE
 ```
 
 ---
 
-
 ## 9. Limitations & future work
 
-**Limitations (stated openly)**
+### Limitations (stated openly)
+
 - The output is a **behavioral proxy**, the probability of *off-task behavior relative to your baseline*, not a measure of what you are thinking.
 - Heuristic **weights are hand-set, not fitted to data**, and have not been validated on a labeled dataset. Transparency was prioritised over a black-box classifier.
 - Legitimate off-screen activity (e.g. reading a paper notebook) can look like "gaze off-screen".
 - Accuracy drops in poor lighting, with occlusion or with extreme camera angles. The app surfaces this via data quality and confidence.
 - Benefits of background noise vary between individuals, and the zone→noise mapping is a hypothesis.
 
-**Future work**
+### Future work
+
 - Accelerate on the Snapdragon **NPU** (e.g. via Qualcomm AI tooling) and ship a native ARM64 build
 - Validate and fit the weights on labeled sessions, then compare against the heuristic
 - Session summaries and focus trends
@@ -394,8 +432,6 @@ Rdtune/
 - Optional user-defined "work zones" (multi-monitor, notes area)
 
 ---
-
-
 
 ## 10. Credits & licenses
 
